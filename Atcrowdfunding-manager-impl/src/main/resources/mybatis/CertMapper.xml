@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.atguigu.atcrowdfunding.manager.dao.CertMapper">
+
+  <select id="queryById" resultType="Cert">
+    select * from t_cert where id = #{id}
+  </select>
+
+  <select id="queryCount" resultType="int">
+    select count(*) from t_cert
+    <where>
+      <if test="pagetext != null">
+        and name like concat('%', #{pagetext}, '%')
+      </if>
+    </where>
+  </select>
+
+  <select id="pageQuery" resultType="Cert">
+    select * from t_cert
+    <where>
+      <if test="pagetext != null">
+        and name like concat('%', #{pagetext}, '%')
+      </if>
+    </where>
+    limit #{startIndex}, #{pagesize}
+  </select>
+
+  <insert id="insertCert">
+    insert into t_cert (
+      name
+    ) values (
+               #{name}
+             )
+  </insert>
+
+  <update id="updateCert">
+    update
+      t_cert
+    set
+      name = #{name}
+    where id = #{id}
+  </update>
+
+  <delete id="deleteCert">
+    delete from t_cert where id = #{id}
+  </delete>
+
+  <delete id="deleteCerts">
+    delete from t_cert where id in
+    <foreach collection="datas" item="cert" open="(" close=")" separator=",">
+      #{cert.id}
+    </foreach>
+  </delete>
+
+
+  <select id="queryCertByAccttype" resultType="Cert" parameterType="string">
+    SELECT * FROM t_cert WHERE id IN (SELECT certid FROM t_account_type_cert WHERE accttype=#{accttype})
+  </select>
+
+
+  <select id="queryAllCert" resultType="Cert">
+    select * from t_cert
+  </select>
+
+  <select id="queryAllAccttypeCert" resultType="map">
+    select accttype,certid from t_account_type_cert
+  </select>
+
+  <insert id="insertAccttypeCert">
+    insert into t_account_type_cert(accttype,certid) values(#{accttype},#{certid})
+  </insert>
+
+
+  <delete id="deleteAccttypeCert">
+    delete from t_account_type_cert where accttype=#{accttype} and certid=#{certid}
+  </delete>
+
+<!--  <insert id="insertMemberCert" parameterType="java.util.List">
+  <foreach collection="list" item="memberCert" separator=";">
+    insert into t_member_cert(memberid, certid, iconpath) values(#{memberCert.memberid},#{memberCert.certid},#{memberCert.iconpath})
+  </foreach>
+</insert>-->
+
+  <insert id="insertMemberCert" parameterType="java.util.List">
+    insert into t_member_cert(memberid, certid, iconpath) values
+    <foreach collection="list" item="memberCert" separator=",">
+      (#{memberCert.memberid},#{memberCert.certid},#{memberCert.iconpath})
+    </foreach>
+  </insert>
+
+  <!--<insert id="insertMemberCert">
+    insert into t_member_cert(memberid,certid,iconpath) values(#{memberid},#{certid},#{iconpath})
+  </insert>-->
+</mapper>
